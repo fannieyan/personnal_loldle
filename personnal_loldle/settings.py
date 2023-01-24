@@ -91,23 +91,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'personnal_loldle.wsgi.application'
 
 
-# # Database
-# # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        "CLIENT": {
-            "name": 'LolChampionProperties',
-            "host": f'mongodb+srv://{os.getenv("MONGODB_USERNAME")}:{os.getenv("MONGODB_PASSWORD")}@cluster0.8pi6mfu.mongodb.net/test',
-            "username": os.getenv("MONGODB_USERNAME"),
-            "password": os.getenv("MONGODB_PASSWORD"),
-            "authMechanism": "SCRAM-SHA-1",
-        },
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
