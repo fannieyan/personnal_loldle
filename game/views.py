@@ -1,37 +1,32 @@
-from pymongo import MongoClient
 from django.http import HttpResponse
 from django.http.response import JsonResponse
 
 from rest_framework import status
 from rest_framework.decorators import api_view
-from game.serializers import ChampionSerializer
-from game.utils import db_model
+from game.utils import db_model, parse_json
+from bson.objectid import ObjectId
 
 
 def index(request):
     return HttpResponse("Hello, world. You're at the game index.")
 
 @api_view(['GET'])
-def champion_details(request, champion_id):
+def champion_details(request, id):
     if request.method == "GET":
         try: 
-            champion = db_model["champion"].find_one({"champion_id": int(champion_id)})
-            ## TODO : Serialize id for better performance when getting champion to check properties
-            ## And join with different collections
-            champion_serializer = ChampionSerializer(champion, many=False)
-            return JsonResponse(champion_serializer.data, safe=False)
-        except: 
+            champion = db_model["champion"].find_one({"_id": ObjectId(id)})
+            return JsonResponse(parse_json(champion), safe=False)
+        except ValueError:
+            print(ValueError)
             return JsonResponse({'message': 'The champion does not exist'}, status=status.HTTP_404_NOT_FOUND) 
     
 
 @api_view(['GET'])
-def random_champion(request):
+def get_random_champion(request):
     if request.method == "GET":
         try: 
-            random_champ = list(db_model["champion"].aggregate([{ "$sample": { "size": 1 } }]))[0]
-            champion_serializer = ChampionSerializer(random_champ, many=False)
-            print(champion_serializer.data)
-            return JsonResponse(champion_serializer.data, safe=False)
+            random_champion = list(db_model["champion"].aggregate([{ "$sample": { "size": 1 } }]))[0]
+            return JsonResponse(parse_json(random_champion), safe=False)
         except : 
             return JsonResponse({'message': 'The champion does not exist'}, status=status.HTTP_404_NOT_FOUND) 
     
