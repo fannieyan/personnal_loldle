@@ -1,13 +1,18 @@
 from django.http import HttpResponse
 from django.http.response import JsonResponse
+import random
+import os
 
 from rest_framework import status
 from rest_framework.decorators import api_view
-from game.utils import db_model, parse_json, lookup_all_properties
-from bson.objectid import ObjectId
+from game.utils import check_properties
+from game.models import ChampionProperties
+from game.serializers import ChampionSerializer
+from cryptography.fernet import Fernet
 
 # Should be saved in database later.
 current_champion = {}
+fernet = Fernet(os.getenv("FERNET_KEY").encode())
 
 
 def index(request):
@@ -18,13 +23,10 @@ def index(request):
 def champion_details(request, id):
     if request.method == "GET":
         try:
-            print([*lookup_all_properties])
-            champion = list(db_model["champion"].aggregate(
-                [*lookup_all_properties, {"$sample": {"size": 1}}]))
-            print(len(champion))
-            return JsonResponse(parse_json(champion[0]), safe=False)
+            champion = ChampionProperties.objects.get(pk=id)
+            champion_serializer = ChampionSerializer(champion)
+            return JsonResponse(champion_serializer.data, safe=False)
         except ValueError:
-            print(ValueError)
             return JsonResponse({'message': 'The champion does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -37,16 +39,23 @@ def check_champion(request):
         to_check = request.query_params.get("champion")
         if (not (reference and to_check)):
             return JsonResponse({"message": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            champion_to_check = list(
-                db_model["champion"].aggregate([*lookup_all_properties, {"$match": {"$and": [{"champion_id": to_check}]}}]))
+            decoded_champion = fernet.decrypt(reference.encode()).decode()
+            champion_reference = ChampionSerializer(ChampionProperties.objects.get(
+                pk=decoded_champion))
         except ValueError:
-            return JsonResponse({'message': 'The champion to be checked does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+            return JsonResponse({'message': 'The reference champion does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
-            champion_reference = list(
-                db_model["champion"].aggregate([*lookup_all_properties, {"$match": {"$and": [{"_id": ObjectId(reference)}]}}]))
+            champion_to_check = ChampionSerializer(
+                ChampionProperties.objects.get(pk=to_check))
         except ValueError:
-            return JsonResponse({'message': 'The champion was not generated correctly.'}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'message': 'The champion to check does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = check_properties(
+            champion_reference.data, champion_to_check.data)
+        return JsonResponse(result, safe=False)
 
 
 @api_view(['GET'])
@@ -54,13 +63,12 @@ def get_random_champion(request):
     global current_champion
     if request.method == "GET":
         try:
-            random_champion = list(db_model["champion"].aggregate([
-                {"$sample": {"size": 1}},
-            ]))[0]
-            current_champion = random_champion
-            # Return MongoDB generated id only (champion_id gives a rough idea of how
-            # the chamion ranks in the alphabet and will be used for check_champion instead).
-            return JsonResponse(parse_json(random_champion['_id']), safe=False)
+            champions = ChampionProperties.objects.all()
+            random_index = random.randrange(0, len(champions))
+            random_champion = champions[random_index]
+            champion_serializer = ChampionSerializer(random_champion)
+            encrypted_champion = fernet.encrypt(
+                champion_serializer.data["champion"].encode())
+            return JsonResponse(encrypted_champion.decode(), safe=False)
         except ValueError:
-            print(ValueError)
             return JsonResponse({'message': 'The champion does not exist'}, status=status.HTTP_404_NOT_FOUND)
