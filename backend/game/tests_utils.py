@@ -1,20 +1,14 @@
-from django.test import TestCase
+from django.test import SimpleTestCase
 import game.utils as utils
 
 
-class GameUtilsTestCase(TestCase):
+class GameUtilsTestCase(SimpleTestCase):
     yuumi = {"champion": "Yuumi", "gender": "Female", "lanes": ["Support"], "species":
              ["Cat"], "resource": "Mana", "ranges": ["Range"], "regions": ["Bandle City", "Ionia"], "release_date": 2022}
     lulu = {"champion": "Lulu", "gender": "Female", "lanes": ["Support", "Top"], "species":
             ["Yordle"], "resource": "Mana", "ranges": ["Range", "Melee"], "regions": ["Bandle City"], "release_date": 2013}
     tahm_kench = {"champion": "Tahm Kench", "gender": "Male", "lanes": ["Top", "Bottom"], "species":
                   ["Something", "Cat"], "resource": "Tongue length", "ranges": ["Melee"], "regions": ["Ionia"], "release_date": 2023}
-
-    def setup_databases(self, **kwargs):
-        pass
-
-    def teardown_databases(self, old_config, **kwargs):
-        pass
 
     def test_check_properties_yuumi_lulu(self):
         check_result = utils.check_properties(self.yuumi, self.lulu)
