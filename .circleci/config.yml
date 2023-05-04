@@ -24,10 +24,10 @@ jobs:
           paths:
             - "venv"
       - run:
-          name: Running tests
+          name: Running unit tests
           command: |
             . venv/bin/activate
-            python3 manage.py test
+            python3 manage.py unittest
       - store_artifacts:
           path: test-reports/
           destination: python_app
