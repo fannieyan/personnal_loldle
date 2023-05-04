@@ -9,7 +9,8 @@ jobs:
     docker:
       - image: cimg/python:3.10.1
     steps:
-      - checkout
+      - checkout:
+          - path: ~/personnal_loldle
       - restore_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:
