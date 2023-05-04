@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 
 
 if not os.environ.get("PRODUCTION"):
@@ -91,16 +92,30 @@ TEMPLATES = [
 WSGI_APPLICATION = 'personnal_loldle.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRESQL_NAME'),
-        'USER': os.getenv('POSTGRESQL_USER'),
-        'PASSWORD': os.getenv('POSTGRESQL_PASSWORD'),
-        'HOST': os.getenv('POSTGRESQL_HOST'),
-        'PORT': os.getenv('POSTGRESQL_PORT'),
+if 'test' in sys.argv or 'test_coverage' in sys.argv:  # Covers regular testing and django-coverage
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRESQL_NAME'),
+            'USER': "postgres",
+            'PASSWORD': "1234",
+            'HOST': "localhost",
+            'PORT': 5432,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRESQL_NAME'),
+            'USER': os.getenv('POSTGRESQL_USER'),
+            'PASSWORD': os.getenv('POSTGRESQL_PASSWORD'),
+            'HOST': os.getenv('POSTGRESQL_HOST'),
+            'PORT': os.getenv('POSTGRESQL_PORT'),
+        }
+    }
+
+print(DATABASES)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
