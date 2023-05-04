@@ -10,6 +10,12 @@ class GameUtilsTestCase(TestCase):
     tahm_kench = {"champion": "Tahm Kench", "gender": "Male", "lanes": ["Top", "Bottom"], "species":
                   ["Something", "Cat"], "resource": "Tongue length", "ranges": ["Melee"], "regions": ["Ionia"], "release_date": 2023}
 
+    def setup_databases(self, **kwargs):
+        pass
+
+    def teardown_databases(self, old_config, **kwargs):
+        pass
+
     def test_check_properties_yuumi_lulu(self):
         check_result = utils.check_properties(self.yuumi, self.lulu)
         expected = {
