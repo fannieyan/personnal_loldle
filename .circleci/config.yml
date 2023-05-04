@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/personnal_loldle/backend
     docker:
-      - image: circleci/python:3.10
+      - image: cimg/python:3.10.11
     steps:
       - checkout
       - restore_cache:
