@@ -22,7 +22,6 @@ class GameUtilsTestCase(SimpleTestCase):
             "regions": utils.validity["PARTIALLY_VALID"],
             "release_date": utils.comparison["MORE"],
         }
-        print(check_result, expected)
         self.assertDictEqual(check_result, expected)
 
     def test_check_properties_yuumi_tahm(self):
