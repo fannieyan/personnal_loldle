@@ -10,8 +10,6 @@ from game.models import ChampionProperties
 from game.serializers import ChampionSerializer
 from cryptography.fernet import Fernet
 
-# Should be saved in database later.
-current_champion = {}
 fernet = Fernet(os.getenv("FERNET_KEY").encode())
 
 
@@ -60,7 +58,6 @@ def check_champion(request):
 
 @api_view(['GET'])
 def get_random_champion(request):
-    global current_champion
     if request.method == "GET":
         try:
             champions = ChampionProperties.objects.all()
