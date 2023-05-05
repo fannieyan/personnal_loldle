@@ -13,23 +13,23 @@ export enum Comparison {
 // TODO: Should probably define one type check per attribute, with enum for each.
 
 export interface ChampionCheck {
-  name: Validity;
+  champion: Validity;
   gender: Validity;
-  position: Validity;
+  lanes: Validity;
   species: Validity;
   resource: Validity;
-  range: Validity;
-  region: Validity;
-  releaseDate: Comparison;
+  ranges: Validity;
+  regions: Validity;
+  release_date: Comparison;
 }
 
 export interface Champion {
-  name: string;
+  champion: string;
   gender: string;
-  position: string[];
+  lanes: string[];
   species: string[];
   resource: string;
-  range: string[];
-  region: string[];
-  releaseDate: number;
+  ranges: string[];
+  regions: string[];
+  release_date: number;
 }
