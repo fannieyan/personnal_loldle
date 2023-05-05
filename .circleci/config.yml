@@ -9,7 +9,8 @@ jobs:
     docker:
       - image: cimg/python:3.10.1
     steps:
-      - checkout
+      - checkout:
+          path: ~/personnal_loldle
       - restore_cache:
           key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - run:
@@ -23,10 +24,10 @@ jobs:
           paths:
             - "venv"
       - run:
-          name: Running tests
+          name: Running unit tests
           command: |
             . venv/bin/activate
-            python3 manage.py test
+            python3 manage.py unittest
       - store_artifacts:
           path: test-reports/
           destination: python_app

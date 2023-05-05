@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 
 
 if not os.environ.get("PRODUCTION"):
@@ -26,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0ww1!ir5u3&$*&!^78hx0jdej+d6w!2+_d+&xw9=)04*+q6j%n'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,21 +92,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'personnal_loldle.wsgi.application'
 
 
-# # Database
-# # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        "CLIENT": {
-            "name": 'LolChampionProperties',
-            "host": f'mongodb+srv://{os.getenv("MONGODB_USERNAME")}:{os.getenv("MONGODB_PASSWORD")}@cluster0.8pi6mfu.mongodb.net/test',
-            "username": os.getenv("MONGODB_USERNAME"),
-            "password": os.getenv("MONGODB_PASSWORD"),
-            "authMechanism": "SCRAM-SHA-1",
-        },
+if 'test' in sys.argv or 'test_coverage' in sys.argv:  # Covers regular testing and django-coverage
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRESQL_NAME'),
+            'USER': "postgres",
+            'PASSWORD': "1234",
+            'HOST': "localhost",
+            'PORT': 5432,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRESQL_NAME'),
+            'USER': os.getenv('POSTGRESQL_USER'),
+            'PASSWORD': os.getenv('POSTGRESQL_PASSWORD'),
+            'HOST': os.getenv('POSTGRESQL_HOST'),
+            'PORT': os.getenv('POSTGRESQL_PORT'),
+        }
+    }
 
 
 # Password validation
