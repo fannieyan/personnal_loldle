@@ -16,7 +16,7 @@ const getPropertyName = (property: string | number | unknown[]) => {
 };
 
 export default defineComponent({
-  name: "HelloWorld",
+  name: "PropertyTableData",
   props: {
     property: { type: [String, Array, Number], required: true },
     validity: {
