@@ -5,7 +5,7 @@ import os
 
 from rest_framework import status
 from rest_framework.decorators import api_view
-from game.utils import check_properties
+from game.utils import check_properties, get_champion_names
 from game.models import ChampionProperties
 from game.serializers import ChampionSerializer
 from cryptography.fernet import Fernet
@@ -69,3 +69,15 @@ def get_random_champion(request):
             return JsonResponse(encrypted_champion.decode(), safe=False)
         except ValueError:
             return JsonResponse({'message': 'The champion does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["GET"])
+def search_champion(request):
+    if request.method == 'GET':
+        if request.query_params.get("name"):
+            champions = ChampionProperties.objects.filter(
+                champion__istartswith=request.query_params.get("name"))
+            response = get_champion_names(champions)
+            return JsonResponse(response, safe=False)
+        else:
+            return JsonResponse(get_champion_names(ChampionProperties.objects.all()), safe=False)

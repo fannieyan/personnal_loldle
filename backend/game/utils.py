@@ -46,3 +46,10 @@ def check_properties(ref, to_check):
             result = check_string(ref[property], to_check[property])
         check_result[property] = result
     return check_result
+
+
+def get_champion_names(champions):
+    result = []
+    for champion in champions:
+        result.append(champion.champion)
+    return result
