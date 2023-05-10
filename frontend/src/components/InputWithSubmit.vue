@@ -30,3 +30,11 @@ export default defineComponent({
     </button>
   </div>
 </template>
+
+<style scoped>
+div {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+</style>
