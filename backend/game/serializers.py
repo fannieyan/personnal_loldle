@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from game.models import ChampionProperties
+import re
 
 
 def serializeStringArray(string):
-    stringWithoutBrackets = string[1:-1]
+    stringWithoutBrackets = re.sub(r"\"", "", string[1:-1])
     return stringWithoutBrackets.split(',')
 
 
