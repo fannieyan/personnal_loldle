@@ -1,15 +1,31 @@
 <script lang="ts">
-import { Champion, ChampionCheck } from "@/types/ChampionCheck";
+import {
+  Champion,
+  ChampionCheck,
+  Comparison,
+  Validity,
+} from "@/types/ChampionCheck";
 import { defineComponent } from "vue";
 import InputWithSubmit from "./InputWithSubmit.vue";
 import ChampionDetailedTableRow from "./ChampionItem/ChampionDetailedTableRow.vue";
-import { checkChampion, getChampion } from "@/services/Champion.services";
+import LoadingChampionComponent from "./LoadingChampionComponent.vue";
+import LoaderIcon from "./UI/LoaderIcon.vue";
+import {
+  checkChampion,
+  getChampion,
+  getRandomChampion,
+} from "@/services/Champion.services";
 
 type ChampionSubmitted = { champion: Champion; check: ChampionCheck };
 type Data = {
   championsSubmitted: ChampionSubmitted[];
   columnTitles: readonly string[];
+  isLoading: boolean;
+  isSubmitting: boolean;
+  isGameWon: boolean;
 };
+
+const localStorageChampionKey = "guessChampion";
 
 const columnTitles = [
   "Nom",
@@ -22,9 +38,16 @@ const columnTitles = [
   "Sortie",
 ];
 
-const onSubmitChampion = async (championSubmitted: ChampionSubmitted[]) => {
-  const [champion, check] = await Promise.all([getChampion(), checkChampion()]);
-  championSubmitted.push({ champion, check });
+const onSubmitChampion = async (championName: string) => {
+  const referenceChampion = window.localStorage.getItem(
+    localStorageChampionKey
+  );
+  if (!referenceChampion) throw new Error("No reference champion!");
+  const [champion, check] = await Promise.all([
+    getChampion(championName),
+    checkChampion(referenceChampion, championName),
+  ]);
+  return { champion, check };
 };
 
 export default defineComponent({
@@ -33,37 +56,88 @@ export default defineComponent({
     return {
       columnTitles: Object.freeze(columnTitles),
       championsSubmitted: [] as ChampionSubmitted[],
+      isLoading: true,
+      isSubmitting: false,
+      isGameWon: false,
     };
   },
   methods: {
-    submitChampion: function () {
-      return onSubmitChampion(this.championsSubmitted);
+    _checkGameState: function ({ check }: ChampionSubmitted) {
+      if (
+        Object.values(check).some(
+          (value) => !(value === Validity.VALID || value === Comparison.EQUAL)
+        )
+      )
+        return;
+      this.isGameWon = true;
+    },
+    submitChampion: async function (championName: string) {
+      if (
+        this.championsSubmitted.find(
+          ({ champion }) =>
+            champion.champion.toLowerCase() === championName.toLowerCase()
+        )
+      ) {
+        alert("Vous avez déjà testé ce champion.");
+        return;
+      }
+      this.isSubmitting = true;
+      const result = await onSubmitChampion(championName);
+      this.championsSubmitted.unshift(result);
+      this._checkGameState(result);
+      this.isSubmitting = false;
     },
   },
-  components: { ChampionDetailedTableRow, InputWithSubmit },
+
+  async mounted() {
+    this.isLoading = true;
+    const championToGuess = window.localStorage.getItem(
+      localStorageChampionKey
+    );
+    if (!championToGuess) {
+      const newChampion = await getRandomChampion();
+      window.localStorage.setItem(localStorageChampionKey, newChampion);
+    }
+    this.isLoading = false;
+  },
+  components: {
+    ChampionDetailedTableRow,
+    InputWithSubmit,
+    LoadingChampionComponent,
+    LoaderIcon,
+  },
 });
 </script>
 
 <template>
   <h1>Devine le champion!</h1>
-  <div>
-    <InputWithSubmit :on-submit="submitChampion" />
+  <div v-if="isLoading">
+    <LoadingChampionComponent />
   </div>
-  <div>
-    <table v-if="championsSubmitted.length">
-      <thead>
-        <td v-for="columnTitle in columnTitles" :key="columnTitle">
-          <div>{{ columnTitle }}</div>
-        </td>
-      </thead>
-      <tbody>
-        <ChampionDetailedTableRow
-          v-for="championSubmitted in championsSubmitted"
-          :key="championSubmitted.champion.name"
-          :champion-check="championSubmitted"
-        />
-      </tbody>
-    </table>
+  <div v-if="!isLoading">
+    <div class="loader-container"><LoaderIcon v-if="isSubmitting" /></div>
+    <div>
+      <InputWithSubmit
+        :on-submit="submitChampion"
+        :disabled="isSubmitting || isGameWon"
+      />
+    </div>
+    <div>
+      <table v-if="championsSubmitted.length">
+        <thead>
+          <td v-for="columnTitle in columnTitles" :key="columnTitle">
+            <div>{{ columnTitle }}</div>
+          </td>
+        </thead>
+        <tbody>
+          <ChampionDetailedTableRow
+            v-for="championSubmitted in championsSubmitted"
+            :key="championSubmitted.champion.champion"
+            :champion-check="championSubmitted"
+          />
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -72,6 +146,7 @@ export default defineComponent({
 table {
   margin: auto;
 }
+
 thead > td > div {
   border-bottom: 3px solid white;
   width: 80%;
@@ -81,15 +156,24 @@ thead > td > div {
   margin-top: 0px;
   margin-bottom: 0px;
 }
+
 td {
   height: 32px;
 }
+
 tbody::before {
   content: "";
   display: block;
   height: 8px;
 }
+
 div {
   margin-top: 32px;
+}
+
+.loader-container {
+  width: 100%;
+
+  height: 32px;
 }
 </style>

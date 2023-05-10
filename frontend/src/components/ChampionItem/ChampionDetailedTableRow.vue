@@ -4,14 +4,14 @@ import PropertyTableData from "./PropertyTableData.vue";
 import { Champion, ChampionCheck } from "@/types/ChampionCheck";
 
 const properties: (keyof ChampionCheck)[] = [
-  "name",
+  "champion",
   "gender",
-  "position",
+  "lanes",
   "species",
   "resource",
-  "range",
-  "region",
-  "releaseDate",
+  "ranges",
+  "regions",
+  "release_date",
 ];
 
 export default defineComponent({
