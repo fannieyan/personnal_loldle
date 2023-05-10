@@ -1,9 +1,15 @@
 <script lang="ts">
-import { Champion, ChampionCheck } from "@/types/ChampionCheck";
+import {
+  Champion,
+  ChampionCheck,
+  Comparison,
+  Validity,
+} from "@/types/ChampionCheck";
 import { defineComponent } from "vue";
 import InputWithSubmit from "./InputWithSubmit.vue";
 import ChampionDetailedTableRow from "./ChampionItem/ChampionDetailedTableRow.vue";
 import LoadingChampionComponent from "./LoadingChampionComponent.vue";
+import LoaderIcon from "./UI/LoaderIcon.vue";
 import {
   checkChampion,
   getChampion,
@@ -15,6 +21,8 @@ type Data = {
   championsSubmitted: ChampionSubmitted[];
   columnTitles: readonly string[];
   isLoading: boolean;
+  isSubmitting: boolean;
+  isGameWon: boolean;
 };
 
 const localStorageChampionKey = "guessChampion";
@@ -49,12 +57,35 @@ export default defineComponent({
       columnTitles: Object.freeze(columnTitles),
       championsSubmitted: [] as ChampionSubmitted[],
       isLoading: true,
+      isSubmitting: false,
+      isGameWon: false,
     };
   },
   methods: {
+    _checkGameState: function ({ check }: ChampionSubmitted) {
+      if (
+        Object.values(check).some(
+          (value) => !(value === Validity.VALID || value === Comparison.EQUAL)
+        )
+      )
+        return;
+      this.isGameWon = true;
+    },
     submitChampion: async function (championName: string) {
+      if (
+        this.championsSubmitted.find(
+          ({ champion }) =>
+            champion.champion.toLowerCase() === championName.toLowerCase()
+        )
+      ) {
+        alert("Vous avez déjà testé ce champion.");
+        return;
+      }
+      this.isSubmitting = true;
       const result = await onSubmitChampion(championName);
       this.championsSubmitted.unshift(result);
+      this._checkGameState(result);
+      this.isSubmitting = false;
     },
   },
 
@@ -73,6 +104,7 @@ export default defineComponent({
     ChampionDetailedTableRow,
     InputWithSubmit,
     LoadingChampionComponent,
+    LoaderIcon,
   },
 });
 </script>
@@ -83,8 +115,12 @@ export default defineComponent({
     <LoadingChampionComponent />
   </div>
   <div v-if="!isLoading">
+    <div class="loader-container"><LoaderIcon v-if="isSubmitting" /></div>
     <div>
-      <InputWithSubmit :on-submit="submitChampion" />
+      <InputWithSubmit
+        :on-submit="submitChampion"
+        :disabled="isSubmitting || isGameWon"
+      />
     </div>
     <div>
       <table v-if="championsSubmitted.length">
@@ -133,5 +169,11 @@ tbody::before {
 
 div {
   margin-top: 32px;
+}
+
+.loader-container {
+  width: 100%;
+
+  height: 32px;
 }
 </style>

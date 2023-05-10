@@ -11,13 +11,22 @@ export default defineComponent({
       type: Function as PropType<(championName: string) => void>,
       required: true,
     },
+    disabled: Boolean,
+  },
+  methods: {
+    submitChampion: function () {
+      this.onSubmit(this.championName);
+      this.championName = "";
+    },
   },
 });
 </script>
 
 <template>
   <div>
-    <input v-model="championName" />
-    <button type="submit" v-on:click="onSubmit(championName)">Vérifier</button>
+    <input v-model="championName" :disabled="disabled" />
+    <button type="submit" v-on:click="submitChampion()" :disabled="disabled">
+      Vérifier
+    </button>
   </div>
 </template>
