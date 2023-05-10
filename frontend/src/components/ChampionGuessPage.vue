@@ -10,6 +10,7 @@ import InputWithSubmit from "./InputWithSubmit.vue";
 import LoadingChampionComponent from "./LoadingChampionComponent.vue";
 import LoaderIcon from "./UI/LoaderIcon.vue";
 import ChampionsTable from "./ChampionsTable.vue";
+import WinWidget from "./WinWidget.vue";
 import {
   checkChampion,
   getChampion,
@@ -19,24 +20,12 @@ import {
 export type ChampionSubmitted = { champion: Champion; check: ChampionCheck };
 type Data = {
   championsSubmitted: ChampionSubmitted[];
-  columnTitles: readonly string[];
   isLoading: boolean;
   isSubmitting: boolean;
   isGameWon: boolean;
 };
 
 const localStorageChampionKey = "guessChampion";
-
-const columnTitles = [
-  "Nom",
-  "Genre",
-  "Lane",
-  "Espèce",
-  "Ressource",
-  "Range",
-  "Région",
-  "Sortie",
-];
 
 const onSubmitChampion = async (championName: string) => {
   const referenceChampion = window.localStorage.getItem(
@@ -54,7 +43,6 @@ export default defineComponent({
   name: "ChampionGuessPage",
   data(): Data {
     return {
-      columnTitles: Object.freeze(columnTitles),
       championsSubmitted: [] as ChampionSubmitted[],
       isLoading: true,
       isSubmitting: false,
@@ -62,7 +50,7 @@ export default defineComponent({
     };
   },
   methods: {
-    _checkGameState: function ({ check }: ChampionSubmitted) {
+    _checkIsGameWon: function ({ check }: ChampionSubmitted) {
       if (
         Object.values(check).some(
           (value) => !(value === Validity.VALID || value === Comparison.EQUAL)
@@ -70,6 +58,7 @@ export default defineComponent({
       )
         return;
       this.isGameWon = true;
+      window.localStorage.removeItem(localStorageChampionKey);
     },
     submitChampion: async function (championName: string) {
       if (
@@ -84,24 +73,33 @@ export default defineComponent({
       this.isSubmitting = true;
       const result = await onSubmitChampion(championName);
       this.championsSubmitted.unshift(result);
-      this._checkGameState(result);
+      this._checkIsGameWon(result);
       this.isSubmitting = false;
+    },
+    onRestartGame: async function () {
+      this.startGame();
+      this.championsSubmitted = [];
+      this.isGameWon = false;
+    },
+    startGame: async function () {
+      this.isLoading = true;
+      const championToGuess = window.localStorage.getItem(
+        localStorageChampionKey
+      );
+      if (!championToGuess) {
+        const newChampion = await getRandomChampion();
+        window.localStorage.setItem(localStorageChampionKey, newChampion);
+      }
+      this.isLoading = false;
     },
   },
 
   async mounted() {
-    this.isLoading = true;
-    const championToGuess = window.localStorage.getItem(
-      localStorageChampionKey
-    );
-    if (!championToGuess) {
-      const newChampion = await getRandomChampion();
-      window.localStorage.setItem(localStorageChampionKey, newChampion);
-    }
-    this.isLoading = false;
+    this.startGame();
   },
   components: {
     ChampionsTable,
+    WinWidget,
     InputWithSubmit,
     LoadingChampionComponent,
     LoaderIcon,
@@ -115,6 +113,12 @@ export default defineComponent({
     <LoadingChampionComponent />
   </div>
   <div v-if="!isLoading">
+    <WinWidget
+      v-if="isGameWon"
+      :answer="championsSubmitted[0].champion.champion"
+      :number-of-tries="championsSubmitted.length"
+      :on-play-again="onRestartGame"
+    />
     <div class="loader-container"><LoaderIcon v-if="isSubmitting" /></div>
     <div>
       <InputWithSubmit
