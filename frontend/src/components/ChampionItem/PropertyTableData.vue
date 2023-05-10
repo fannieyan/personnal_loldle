@@ -12,7 +12,7 @@ const getClassName = (validity: Validity | Comparison) => {
 const getPropertyName = (property: string | number | unknown[]) => {
   if (typeof property === "number") return property.toString();
   if (typeof property === "string") return property;
-  if (Array.isArray(property)) return property.join("\n");
+  if (Array.isArray(property)) return property.join(", ");
 };
 
 export default defineComponent({
@@ -46,16 +46,18 @@ export default defineComponent({
 .championData {
   color: #f1f1f1;
   width: 100px;
-  white-space: pre;
+  max-width: 100px;
+  white-space: break-spaces;
   height: 100px;
+  padding: 4px;
 }
 .isValid {
-  background-color: green;
+  background-color: #069c56;
 }
 .isNotValid {
-  background-color: red;
+  background-color: #d3212c;
 }
 .isPartiallyValid {
-  background-color: orange;
+  background-color: #ff980e;
 }
 </style>
