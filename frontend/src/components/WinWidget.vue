@@ -1,7 +1,5 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { ChampionSubmitted } from "./ChampionGuessPage.vue";
-import ChampionDetailedTableRow from "./ChampionItem/ChampionDetailedTableRow.vue";
 
 const columnTitles = [
   "Nom",
