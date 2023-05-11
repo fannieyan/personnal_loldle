@@ -8,15 +8,21 @@ export default defineComponent({
   },
   props: {
     onSubmit: {
-      type: Function as PropType<(championName: string) => void>,
+      type: Function as PropType<(championName: string) => Promise<void>>,
       required: true,
     },
     disabled: Boolean,
   },
   methods: {
-    submitChampion: function () {
-      this.onSubmit(this.championName);
-      this.championName = "";
+    submitChampion: async function () {
+      try {
+        await this.onSubmit(this.championName);
+        this.championName = "";
+      } catch (error) {
+        alert(
+          "Une erreur est survenue. Vérifiez l'orthographe du champion proposé ou votre connexion internet."
+        );
+      }
     },
   },
 });
