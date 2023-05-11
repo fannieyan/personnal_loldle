@@ -31,6 +31,11 @@ export default defineComponent({
     propertyName: function () {
       return getPropertyName(this.property);
     },
+    arrowRotationDegree: function () {
+      if (this.validity === Comparison.LESS) return 0;
+      if (this.validity === Comparison.MORE) return 180;
+      return null;
+    },
   },
 });
 </script>
@@ -38,6 +43,11 @@ export default defineComponent({
 <template>
   <td :class="[className, 'championData']">
     <p>{{ propertyName }}</p>
+    <img
+      src="/red-arrow.png"
+      v-if="arrowRotationDegree !== null"
+      v-bind:style="{ transform: `rotate(${arrowRotationDegree}deg)` }"
+    />
   </td>
 </template>
 
@@ -50,6 +60,23 @@ export default defineComponent({
   white-space: break-spaces;
   height: 100px;
   padding: 4px;
+  position: relative;
+}
+p {
+  position: relative;
+  z-index: 2;
+  font-size: 18px;
+}
+img {
+  position: absolute;
+  filter: drop-shadow(0px 0px 2px #222);
+
+  top: 50%;
+  left: 50%;
+  width: 88px;
+  height: 88px;
+  margin-top: -44px; /* Half the height */
+  margin-left: -44px; /* Half the width */
 }
 .isValid {
   background-color: #069c56;
