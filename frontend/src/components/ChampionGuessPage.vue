@@ -71,10 +71,13 @@ export default defineComponent({
         return;
       }
       this.isSubmitting = true;
-      const result = await onSubmitChampion(championName);
-      this.championsSubmitted.unshift(result);
-      this._checkIsGameWon(result);
-      this.isSubmitting = false;
+      try {
+        const result = await onSubmitChampion(championName);
+        this.championsSubmitted.unshift(result);
+        this._checkIsGameWon(result);
+      } finally {
+        this.isSubmitting = false;
+      }
     },
     onRestartGame: async function () {
       this.startGame();
