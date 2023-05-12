@@ -14,10 +14,8 @@ from pathlib import Path
 import os
 import sys
 
-
-if not os.environ.get("PRODUCTION"):
-    from dotenv import load_dotenv
-    load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -69,6 +67,8 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8080',
+    'https://private-loldle.netlify.app',
+    'lyvezel.eu.pythonanywhere.com'
 )
 
 ROOT_URLCONF = 'personnal_loldle.urls'
