@@ -21,3 +21,9 @@ export const getRandomChampion = async (): Promise<string> => {
   const response = await fetch(`${getAPIUrl()}/champion/random`);
   return response.text();
 };
+
+export const searchChampions = async (search: string): Promise<string[]> => {
+  return fetch(
+    `${getAPIUrl()}/champion?` + new URLSearchParams({ name: search })
+  ).then((response) => response.json());
+};
