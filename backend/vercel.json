@@ -1,0 +1,14 @@
+{
+    "builds": [
+      {
+        "src": "personnal_loldle/wsgi.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "personnal_loldle/wsgi.py"
+      }
+    ]
+  }

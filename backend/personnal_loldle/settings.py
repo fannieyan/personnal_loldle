@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'lyvezel.eu.pythonanywhere.com'
+    '.vercel.app'
 ]
 
 
@@ -90,7 +90,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'personnal_loldle.wsgi.application'
+WSGI_APPLICATION = 'personnal_loldle.wsgi.app'
 
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:  # Covers regular testing and django-coverage
