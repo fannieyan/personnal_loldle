@@ -14,8 +14,7 @@ from pathlib import Path
 import os
 import sys
 
-
-if not os.environ.get("PRODUCTION"):
+if not (os.getenv('PRODUCTION') == "true"):
     from dotenv import load_dotenv
     load_dotenv()
 
@@ -32,7 +31,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '.vercel.app'
+]
 
 
 # Application definition
@@ -69,6 +70,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8080',
+    'https://private-loldle.netlify.app',
 )
 
 ROOT_URLCONF = 'personnal_loldle.urls'
@@ -89,7 +91,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'personnal_loldle.wsgi.application'
+WSGI_APPLICATION = 'personnal_loldle.wsgi.app'
 
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:  # Covers regular testing and django-coverage
